@@ -42,3 +42,18 @@ ENV/
 
 # PyCharm env
 .idea
+
+# --- Практика 2: Березники ---
+# Дополнительные виртуальные окружения
+.venv*/
+# Кэш osmnx/iduedu (пересоздаётся автоматически)
+cache/
+examples/cache/
+# Сырые выгрузки OSM в XML (72 МБ и тайлы): не нужны для повторного запуска, есть GeoJSON
+**/raw/osm_combined.xml
+**/raw/osm_center.xml
+**/raw/osm_tiles/
+# Старая копия данных; рабочая папка — examples/data/berezniki
+/data/
+# Резервные копии перед правками
+*_backup_before_population_fix.*

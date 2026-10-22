@@ -6,15 +6,21 @@ build-backend = "setuptools.build_meta"
 name = "my_package" # название вашего проекта
 dynamic = ["version"]
 authors = [
-    { name = "Vasilii Starikov", email = "vasilstar97@gmail.com" },
-] # не забудьте поменять на свое имя :)
-description = "IDU research package boilerplate"
+    { name = "Sofya Siteva" },
+]
+description = "Учебное исследование кварталов г. Березники (Пермский край) с BlocksNet"
 readme = "README.rst"
 requires-python = ">=3.10"
 license = { file = "LICENCE" }
 
 dependencies = [ # здесь необходимо вести все устанавливаемые зависимости: пакеты, которые необходимы для адекватной работы вашей библиотеки
     "geopandas>=1.0.0,<2.0.0",
+    "osmnx>=2.0.0,<3.0.0",      # загрузка данных из OpenStreetMap
+    "blocksnet==1.0.0a9",        # основная библиотека (кварталы, показатели, графы)
+    "iduedu>=0.4.0,<0.5.0",      # источник графов доступности (walk/drive) для BlocksNet
+    "lxml>=4.9.0",               # сериализация графов в GraphML (osmnx.save_graphml)
+    "matplotlib>=3.7",           # графики в ноутбуке и дашборде
+    "folium>=0.14.0",            # интерактивная карта в dashboard.html
 ]
 
 classifiers = [ # метаданные для описания проекта пользователям, например, на PyPI: какая лицензия, какое предназначение
@@ -67,8 +73,8 @@ docs = [ # зависимости, необходимые для сборки д
 
 
 [project.urls]
-"Repository" = "https://github.com/vasilstar97/python-package-boilerplate"
-"Bug Tracker" = "https://github.com/vasilstar97/python-package-boilerplate/issues"
+"Repository" = "https://github.com/ssiteva/urban-ai-practice-Berezniki"
+"Bug Tracker" = "https://github.com/ssiteva/urban-ai-practice-Berezniki/issues"
 
 # всякие истории, связанные с форматированием кода
 [tool.black]
