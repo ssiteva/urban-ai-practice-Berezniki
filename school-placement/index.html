@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Размещение школ — Березники (Практика 3)</title>
+<style>
+  :root {
+    --bg: #f6f7f9; --panel: #fff; --ink: #1d2433; --muted: #5d6777; --line: #dde2ea;
+    --accent: #2457c5; --accent-soft: #e8eefb; --good: #1a7f4b; --bad: #b42318; --warn: #b54708;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 14px/1.45 "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif; color: var(--ink); background: var(--bg); }
+  header { padding: 12px 20px; background: var(--panel); border-bottom: 1px solid var(--line); display: flex; flex-wrap: wrap; align-items: center; gap: 12px 24px; }
+  header h1 { font-size: 18px; margin: 0; font-weight: 650; }
+  header .sub { color: var(--muted); font-size: 13px; }
+  .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+  .seg button { border: 0; background: #fff; padding: 6px 12px; cursor: pointer; font: inherit; color: var(--ink); }
+  .seg button + button { border-left: 1px solid var(--line); }
+  .seg button.on { background: var(--accent); color: #fff; }
+  main { display: grid; grid-template-columns: 360px 1fr 330px; gap: 12px; padding: 12px; align-items: start; }
+  @media (max-width: 1250px) { main { grid-template-columns: 340px 1fr; } #right { grid-column: 1 / -1; } }
+  @media (max-width: 820px) { main { grid-template-columns: 1fr; } }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px; margin-bottom: 12px; }
+  .card h2 { font-size: 15px; margin: 0 0 10px; font-weight: 650; }
+  .card h3 { font-size: 13px; margin: 12px 0 6px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .03em; }
+  label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 4px; }
+  input[type=number], input[type=text] { width: 100%; padding: 7px 9px; border: 1px solid var(--line); border-radius: 7px; font: inherit; }
+  .row { display: flex; gap: 8px; align-items: end; }
+  .row > * { flex: 1; }
+  button.btn { padding: 8px 12px; border-radius: 7px; border: 1px solid var(--line); background: #fff; cursor: pointer; font: inherit; color: var(--ink); }
+  button.btn:hover { background: #f1f4f9; }
+  button.btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+  button.btn.primary:hover { background: #1d48a6; }
+  button.btn:disabled { opacity: .5; cursor: default; }
+  button.small { padding: 3px 8px; font-size: 12px; }
+  .full { width: 100%; margin-top: 8px; }
+  .msg { font-size: 13px; margin-top: 6px; min-height: 18px; }
+  .msg.err { color: var(--bad); } .msg.ok { color: var(--good); } .msg.warn { color: var(--warn); }
+  .muted { color: var(--muted); font-size: 12.5px; }
+  table { border-collapse: collapse; width: 100%; font-size: 12.5px; }
+  th, td { padding: 5px 6px; border-bottom: 1px solid var(--line); text-align: right; white-space: nowrap; }
+  th { position: sticky; top: 0; background: #f3f5f8; font-weight: 600; cursor: pointer; user-select: none; }
+  th:first-child, td:first-child { text-align: left; }
+  tr.sel td { background: var(--accent-soft); }
+  tr.best td { background: #e7f6ec; font-weight: 600; }
+  tbody tr:hover td { background: #f6f8fb; cursor: pointer; }
+  .scroll { max-height: 330px; overflow: auto; border: 1px solid var(--line); border-radius: 8px; }
+  .pos { color: var(--good); } .neg { color: var(--bad); }
+  #mapwrap { position: relative; height: 640px; background: #eef1f5; border-radius: 10px; overflow: hidden; border: 1px solid var(--line); }
+  #map { width: 100%; height: 100%; display: block; cursor: grab; }
+  #map.drag { cursor: grabbing; }
+  .maptop { position: absolute; top: 10px; left: 10px; display: flex; gap: 8px; flex-wrap: wrap; }
+  .legend { position: absolute; bottom: 10px; left: 10px; background: rgba(255,255,255,.95); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; font-size: 12px; }
+  .legend .bar { width: 220px; height: 10px; border-radius: 3px; margin: 4px 0; }
+  .zoom { position: absolute; top: 10px; right: 10px; display: flex; flex-direction: column; gap: 4px; }
+  .zoom button { width: 32px; height: 32px; border-radius: 6px; border: 1px solid var(--line); background: #fff; cursor: pointer; font-size: 16px; }
+  #tip { position: absolute; pointer-events: none; background: rgba(29,36,51,.92); color: #fff; padding: 5px 8px; border-radius: 6px; font-size: 12px; display: none; white-space: nowrap; }
+  .metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .metric { background: #f7f9fc; border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; }
+  .metric .v { font-size: 19px; font-weight: 650; }
+  .metric .k { font-size: 12px; color: var(--muted); }
+  .kv { display: grid; grid-template-columns: 1fr auto; gap: 3px 10px; font-size: 13px; }
+  .kv div:nth-child(odd) { color: var(--muted); }
+  .kv div:nth-child(even) { text-align: right; font-weight: 600; }
+  .tag { display: inline-block; font-size: 11px; padding: 1px 6px; border-radius: 10px; background: #eef1f5; color: var(--muted); font-weight: 500; }
+  .tag.p2 { background: #fff3e0; color: #8a4b00; }
+  .schools-list { list-style: none; padding: 0; margin: 6px 0 0; }
+  .schools-list li { display: flex; justify-content: space-between; align-items: center; padding: 5px 8px; border: 1px solid var(--line); border-radius: 7px; margin-bottom: 5px; }
+  progress { width: 100%; height: 12px; }
+  .stale { color: var(--warn); font-weight: 600; }
+  .bottom { grid-column: 1 / -1; }
+  details summary { cursor: pointer; font-weight: 600; }
+  .check { font-size: 13px; }
+  .check li { margin-bottom: 3px; }
+  .pill { display:inline-block; padding: 2px 8px; border-radius: 10px; font-size: 12px; font-weight: 600; }
+  .pill.ok { background: #e7f6ec; color: var(--good); } .pill.err { background: #fde8e7; color: var(--bad); }
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>Оценка размещения школ — Березники</h1>
+    <div class="sub">Практика 3 · данные и метод Практики 2 (BlocksNet 1.0.0a9, <code>competitive_provision</code>)</div>
+  </div>
+  <div>
+    <label style="margin:0 0 3px">Граф доступности (время в пути ≤ 15 мин)</label>
+    <div class="seg" id="modeSeg">
+      <button data-mode="walk" class="on">Пешком</button>
+      <button data-mode="drive">На машине</button>
+    </div>
+  </div>
+  <div id="baselineCheck" class="check"></div>
+</header>
+
+<main>
+  <!-- ЛЕВАЯ КОЛОНКА: управление -->
+  <section id="left">
+    <div class="card">
+      <h2>Сценарий: ручное размещение</h2>
+      <div class="muted" style="margin-bottom:8px">Щёлкните квартал на карте, укажите число мест и добавьте школу. В сценарии может быть несколько школ.</div>
+      <div class="row">
+        <div><label>Выбранный квартал</label><input type="text" id="selBlock" readonly placeholder="— выберите на карте —"></div>
+        <div><label>Мест в школе</label><input type="number" id="seatsInput" value="600" min="1" step="1"></div>
+      </div>
+      <button class="btn full" id="addSchool">+ Добавить школу в квартал</button>
+      <div class="msg" id="addMsg"></div>
+      <ul class="schools-list" id="schoolsList"></ul>
+      <button class="btn primary full" id="calcBtn">Рассчитать сценарий</button>
+      <div class="msg" id="calcMsg"></div>
+      <div class="row" style="margin-top:8px">
+        <button class="btn" id="resetBtn">Сбросить изменения</button>
+        <button class="btn" id="presetA" title="Эксперимент, сценарий A">Сценарий A</button>
+        <button class="btn" id="presetB" title="Эксперимент, сценарий B">Сценарий B</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Автоматическое размещение (одна школа)</h2>
+      <label for="autoSeats">Вместимость новой школы, мест</label>
+      <input type="number" id="autoSeats" value="600" min="1" step="1">
+      <button class="btn primary full" id="autoBtn">Разместить автоматически</button>
+      <div style="margin-top:8px"><progress id="autoProg" value="0" max="1"></progress></div>
+      <div class="msg" id="autoMsg"></div>
+      <div class="muted">Каждый квартал проверяется отдельно, от исходных данных: школа ставится в квартал, обеспеченность пересчитывается по всей территории, считается сокращение общего дефицита мест. Ёмкость одного варианта не переносится в другой.</div>
+      <button class="btn full" id="applyBest" disabled>Применить лучший квартал как сценарий</button>
+    </div>
+
+    <div class="card">
+      <h2>Сохранённые сценарии</h2>
+      <div class="row">
+        <div><label>Название</label><input type="text" id="scName" placeholder="например, A — одна школа 600"></div>
+      </div>
+      <button class="btn full" id="saveScenario">Сохранить текущий сценарий для сравнения</button>
+      <div class="msg" id="saveMsg"></div>
+      <div class="scroll" style="max-height:240px;margin-top:8px"><table id="savedTable"></table></div>
+      <button class="btn full" id="exportSaved">Экспорт сравнения сценариев (CSV)</button>
+    </div>
+  </section>
+
+  <!-- ЦЕНТР: карта -->
+  <section id="center">
+    <div id="mapwrap">
+      <canvas id="map"></canvas>
+      <div class="maptop">
+        <div class="seg" id="viewSeg">
+          <button data-view="base" class="on">Исходное</button>
+          <button data-view="scen">Сценарий</button>
+          <button data-view="diff">Изменение</button>
+        </div>
+      </div>
+      <div class="zoom">
+        <button id="zin" title="Приблизить">+</button>
+        <button id="zout" title="Отдалить">−</button>
+        <button id="zfit" title="Вся территория">⤢</button>
+      </div>
+      <div class="legend" id="legend"></div>
+      <div id="tip"></div>
+    </div>
+    <div class="card" style="margin-top:12px">
+      <h2>Итоги по территории <span id="resultState"></span></h2>
+      <div class="metrics" id="metrics"></div>
+    </div>
+  </section>
+
+  <!-- ПРАВАЯ КОЛОНКА: карточка квартала, итоги автоподбора -->
+  <section id="right">
+    <div class="card">
+      <h2>Карточка квартала</h2>
+      <div id="blockCard" class="muted">Выберите квартал на карте.</div>
+    </div>
+    <div class="card">
+      <h2>Результаты автоподбора</h2>
+      <div id="autoSummary" class="muted">Ещё не запускался.</div>
+      <div class="scroll" style="margin-top:8px"><table id="autoTable"></table></div>
+      <button class="btn full" id="exportAuto" disabled>Экспорт вариантов (CSV)</button>
+    </div>
+  </section>
+
+  <section class="bottom">
+    <div class="card">
+      <h2>Сравнение исходных и новых значений по кварталам</h2>
+      <div class="row" style="align-items:center;margin-bottom:8px">
+        <label style="margin:0;flex:0 0 auto"><input type="checkbox" id="onlyChanged" checked> только кварталы с изменениями</label>
+        <span class="muted" id="cmpInfo" style="flex:1"></span>
+        <button class="btn" id="exportCmp" style="flex:0 0 auto">Сохранить таблицу результатов (CSV)</button>
+      </div>
+      <div class="scroll" style="max-height:420px"><table id="cmpTable"></table></div>
+    </div>
+
+    <div class="card">
+      <details open>
+        <summary>Единицы, источники данных и допущения</summary>
+        <div id="about" style="margin-top:8px"></div>
+      </details>
+    </div>
+  </section>
+</main>
+
+<script src="data/base_data.js"></script>
+<script src="model.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
